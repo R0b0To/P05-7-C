@@ -1,0 +1,22 @@
+ircut?mode=night
+ircut?mode=day
+ircut?mode=auto
+whitelight?mode=off
+whitelight?mode=on
+playaudio?file=/tmp/VOICE/alarm.wav
+irctrl?mode=day
+irctrl?mode=night
+redinfra?mode=on
+redinfra?mode=off
+buleled?mode=on
+buleled?mode=off
+redled?mode=on
+redled?mode=off
+ircut_only?mode=day
+ircut_only?mode=night
+
+ptzctrl //already using the one from the hack
+reloadcf
+rstsys
+wexit "close watchdog then exit !!!" Subroutine does not retur
+4gstatus

@@ -1,8 +1,193 @@
-<html>
-    <head>
-        <meta http-equiv="refresh" content="0; url=cgi-bin/webui" />
-    </head>
-    <body>
-        <a href="cgi-bin/webui">WebUI</a>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Camera - WebUI</title>
+    <style>
+       body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.5em;
+            color: #4CAF50;
+        }
+        .container {
+            text-align: center;
+        }
+        #snapshot {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            margin: 20px auto;
+        }
+        .button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button:active {
+            background-color: #388e3c;
+        }
+        .ptz-controls button {
+            padding: 10px;
+            font-size: 1em;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .ptz-controls button:hover {
+            background-color: #1976D2;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img id="snapshot" src="snapshot" alt="Camera Snapshot" />
+
+    <div>
+        <button class="button" id="home">Home</button>
+        <button class="button" id="lighton">Light On</button>
+        <button class="button" id="lightoff">Light Off</button>
+        <button class="button" id="ircutnight">Night Mode On</button>
+        <button class="button" id="ircutday">Night Mode Off</button>
+        <button class="button" id="irledson">IR LEDs On</button>
+        <button class="button" id="irledsoff">IR LEDs Off</button>
+    </div>
+
+    <div class="ptz-controls">
+        <div>
+            <button class="button" id="ptzlu">&#11017;</button>
+            <button class="button" id="ptzu">&#11014;</button>
+            <button class="button" id="ptzru">&#11016;</button>
+        </div>
+        <div>
+            <button class="button" id="ptzl">&#11013;</button>
+            <span>PTZ</span>
+            <button class="button" id="ptzr">&#10145;</button>
+        </div>
+        <div>
+            <button class="button" id="ptzld">&#11019;</button>
+            <button class="button" id="ptzd">&#11015;</button>
+            <button class="button" id="ptzrd">&#11018;</button>
+        </div>
+    </div>
+
+    <footer>
+        <p><span id="uptime"></span></p>
+    </footer>
+</div>
+
+<script>
+    // Send AJAX request to execute commands without reloading the page
+    async function sendCommand(command) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'cgi-bin/webui?command=' + command, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    resolve(xhr.responseText); // Resolve with the response text
+                } else {
+                    reject(`Error: ${xhr.status}`); // Handle errors
+                }
+            }
+        };
+        xhr.send();
+    });
+}
+
+    
+    document.getElementById('lighton').addEventListener('click', function() {
+        sendCommand('lighton');
+    });
+
+    document.getElementById('lightoff').addEventListener('click', function() {
+        sendCommand('lightoff');
+    });
+
+    document.getElementById('ircutnight').addEventListener('click', function() {
+        sendCommand('ircutnight');
+    });
+
+    document.getElementById('ircutday').addEventListener('click', function() {
+        sendCommand('ircutday');
+    });
+
+    document.getElementById('irledson').addEventListener('click', function() {
+        sendCommand('iron');
+    });
+
+    document.getElementById('irledsoff').addEventListener('click', function() {
+        sendCommand('iroff');
+    });
+
+    document.getElementById('ptzlu').addEventListener('click', function() {
+        sendCommand('ptzlu');
+    });
+
+    document.getElementById('ptzu').addEventListener('click', function() {
+        sendCommand('ptzu');
+    });
+
+    document.getElementById('ptzru').addEventListener('click', function() {
+        sendCommand('ptzru');
+    });
+
+    document.getElementById('ptzl').addEventListener('click', function() {
+        sendCommand('ptzl');
+    });
+
+    document.getElementById('ptzr').addEventListener('click', function() {
+        sendCommand('ptzr');
+    });
+
+    document.getElementById('ptzld').addEventListener('click', function() {
+        sendCommand('ptzld');
+    });
+
+    document.getElementById('ptzd').addEventListener('click', function() {
+        sendCommand('ptzd');
+    });
+
+    document.getElementById('ptzrd').addEventListener('click', function() {
+        sendCommand('ptzrd');
+    });
+
+    
+    async function updateUI() {
+        document.getElementById('uptime').innerText = await sendCommand('uptime');
+    }
+    setInterval(function() {
+        document.getElementById("snapshot").src = "cgi-bin/snapshot?t=" + Math.random();
+    }, 1000);
+
+    setInterval(updateUI, 60000);
+    updateUI();  // Initial call
+</script>
+
+</body>
 </html>

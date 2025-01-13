@@ -5,20 +5,7 @@ This hack is for various Chinese Goke GK7102 based IP Cameras. There are few dif
 
 ## Working on the following camera models
 
-* V-Tac 1080P IP Indoor Camera (read-only version)
-* ZS-GX1
-* Snowman SRC-001
-* GUUDGO GD-SC01
-* GUUDGO GD-SC03
-* GUUDGO GD-SC11
-* Digoo DG-W01F
-* Digoo DG-MYQ
-* YSA CIPC-GC13H
-* KERUI CIPC-GC15HE (read-only version)
-* EYEPLUS CIPC-GC13H (read-only version)
-* HIP291-1M
-* 2M-AI
-* others on the GOKE processor: GK7102 (GK7102S)
+* P05-7-C
 
 
 ## Features
@@ -26,9 +13,10 @@ This hack is for various Chinese Goke GK7102 based IP Cameras. There are few dif
 * Blocking cloud hosts
 * New version of BusyBox v1.26.2
 * Configurable settings
-* BusyBox FTP Server
+* BusyBox FTP Server (http://192.168.1.66:21) (camera ip)
 * dropbear SSH Server: root can login ssh without password
-* WebUI PTZ - (http://192.168.200.1:8080/cgi-bin/webui)
+* WebUI PTZ - (http://192.168.1.66:8080) (camera ip)
+* Telnet on port 22
 * Debug and diagnostics tools: [andrew-d/static-binaries](https://github.com/andrew-d/static-binaries/tree/master/binaries/linux/arm)
 * Changes login credentials to ```user: root password: cxlinux```
 * Improved terminal experience
@@ -151,6 +139,7 @@ If you want to disable the whitelight you can edit `hwcfg.ini` and change suppor
 `support_doublelight = 1`
 
 
+
 ### Tweaks
 
 * [Security, RTSP, SSH, Video files to SD Card](https://github.com/ant-thomas/zsgx1hacks/pull/93/files)
@@ -166,9 +155,9 @@ If you want to disable the whitelight you can edit `hwcfg.ini` and change suppor
 
 1080P IP Indoor Camera EU Power Plug & Auto Track Function
 Brand: V-Tac
-Model: VT-5122
+Model: p05 7 
 
-[V-Tac 1080P IP Indoor Camera ](https://www.v-tac.eu/products/smart-home/cameras/1080p-ip-indoor-camera-eu-power-plug-auto-track-function-detail.html)
+ycc365 p05 7 camera]
 
 
 ### Wi-Fi Manufacturer
@@ -179,19 +168,9 @@ Floor 3, Bldg. 5, Area B, Xinfu Industrial Park, Chongqing Rd., Baoan Dist,Shenz
 
 
 ### Software Versions
-```
-$ ls /tmp | grep -F 3.
-3.4.2.0724
-gc2033
-
+```ls
 $ uname -a
-Linux localhost 3.4.43-gk #46 PREEMPT Wed Jun 26 13:47:34 CST 2019 armv6l GNU/Linux
-
-$ busybox
-BusyBox v1.22.1 (2019-06-18 19:35:31 CST) multi-call binary.
-
-$ cat /etc/issue
-Welcome to Goke Linux
+Linux localhost 3.4.43-gk #40 PREEMPT Thu May 21 10:00:34 CST 2020 armv6l GNU/Linux
 
 p2pcam
 ver: 3.4.2.0724
@@ -202,21 +181,29 @@ Get Hardware Info: model:Y13,  firmware-ident:eyeplus_ipc_gk_008
 
 ### Hardware info
 ```
-$ cat /home/hardinfo.bin
+$ cat /bak/hardinfo.bin
+<?xml version="1.0" encoding="UTF-8"?>
+<DeviceInfo version="1.0">
 <DeviceClass>0</DeviceClass>
 <OemCode>0</OemCode>
-<BoardType>1007</BoardType>
-<FirmwareIdent>eyeplus_ipc_gk_008</FirmwareIdent>
-<Manufacturer>RS</Manufacturer>
+<BoardType>1300</BoardType>
+<FirmwareIdent>eyeplus_ipc_gkc_002</FirmwareIdent>
+<Manufacturer>KAIZE</Manufacturer>
 <Model>GK7102</Model>
+<WifiChip>RTL8188</WifiChip>
 <GPIO>
-<BoardReset>53_0x00000000_0_0</BoardReset>
-<SpeakerCtrl>33_0x00000000_0_0</SpeakerCtrl>
-<WhiteLight>15_0x00000000_0_1</WhiteLight>
-<IrCtrl>12_0x00000000_0_1</IrCtrl>
-<IrCut1B>44_0x00000000_0_1</IrCut1B>
-<IrCut2B>39_0x00000000_0_1</IrCut2B>
+<BoardReset>16_0x00000000_0_0</BoardReset>
+<SpeakerCtrl>12_0x00000000_0_0</SpeakerCtrl>
+<IrFeedback>0</IrFeedback>
+<BlueLed>-1</BlueLed>
+<RedLed>-1</RedLed>
+<IrCtrl>23_0x00000000_0_1</IrCtrl>
+<IrCut2B>14_0x00000000_0_1</IrCut2B>
+<IrCut1B>17_0x00000000_0_1</IrCut1B>
+<WhiteLight>24_0x00000000_0_1</WhiteLight>
+<ALarmLight>11_0x00000000_0_0</ALarmLight>
 </GPIO>
+
 ```
 
 ### Open ports
@@ -255,86 +242,6 @@ Revision        : 0000
 Serial          : 0000000000000000
 $ 
 ```
-
-### Memory
-```
-$ cat /proc/meminfo 
-MemTotal:          31844 kB
-MemFree:            2192 kB
-Buffers:            2284 kB
-Cached:            11256 kB
-SwapCached:            0 kB
-Active:             5488 kB
-Inactive:          11856 kB
-Active(anon):       3996 kB
-Inactive(anon):      536 kB
-Active(file):       1492 kB
-Inactive(file):    11320 kB
-Unevictable:           0 kB
-Mlocked:               0 kB
-SwapTotal:             0 kB
-SwapFree:              0 kB
-Dirty:                 0 kB
-Writeback:             0 kB
-AnonPages:          3820 kB
-Mapped:             3412 kB
-Shmem:               728 kB
-Slab:               8548 kB
-SReclaimable:       1212 kB
-SUnreclaim:         7336 kB
-KernelStack:         656 kB
-PageTables:          384 kB
-NFS_Unstable:          0 kB
-Bounce:                0 kB
-WritebackTmp:          0 kB
-CommitLimit:       15920 kB
-Committed_AS:     163912 kB
-VmallocTotal:    2039808 kB
-VmallocUsed:       63408 kB
-VmallocChunk:    1005336 kB
-```
-
-### /etc/passwd
-```
-$ cat /etc/passwd
-root:yE7gW4O0CSXXg:0:0::/root:/bin/sh
-daemon:x:1:1:daemon:/usr/sbin:/bin/sh
-bin:x:2:2:bin:/bin:/bin/sh
-sys:x:3:3:sys:/dev:/bin/sh
-sync:x:4:100:sync:/bin:/bin/sync
-mail:x:8:8:mail:/var/spool/mail:/bin/sh
-proxy:x:13:13:proxy:/bin:/bin/sh
-www-data:x:33:33:www-data:/var/www:/bin/sh
-backup:x:34:34:backup:/var/backups:/bin/sh
-operator:x:37:37:Operator:/var:/bin/sh
-haldaemon:x:68:68:hald:/:/bin/sh
-dbus:x:81:81:dbus:/var/run/dbus:/bin/sh
-ftp:x:83:83:ftp:/home/ftp:/bin/sh
-nobody:x:99:99:nobody:/home:/bin/sh
-sshd:x:103:99:Operator:/var:/bin/sh
-default:x:1000:1000:Default non-root user:/home/default:/bin/sh
-```
-
-### cat /home/cloud.ini 
-```
-[SERVERINFO]
-server_name=arcsoft.com
-xmpp_server_ip=xmpp.icloseli.cn.
-relay_server_ip=relaycn.arcsoftcloud.com
-auto_update_server_ip=update.icloseli.cn.
-lecam_purchase_server_ip=esd.icloseli.cn.
-upns_pnserver=upns.icloseli.cn.
-upns_xmpp_name=arcsoft.com
-upns_xmpp_ip=xmpp.icloseli.cn.
-argus_api_server_ip=argus.icloseli.cn.
-argus_server_ip=argus.icloseli.cn.
-relay_server_domain_name=relay.icloseli.cn.
-stun_server_ip=stun.icloseli.cn.
-cloud_auth_server_name=api.icloseli.cn.
-bell_server_ip=bell.icloseli.cn
-return_server_ip=relaycn.closeli.cn
-```
-
 
 ## References
 

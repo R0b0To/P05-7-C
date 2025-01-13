@@ -12,6 +12,21 @@ fi
 
 # confirm hack type
 touch /home/HACKSD
+
+#this camera model transfer all the files from /home to /bak
+#function to remount as read and write
+mountBakRW()
+{
+		echo "mounting /bak read & write ..."
+		mount -o rw,remount /bak
+}
+#function to remount as read only
+mountBakRO()
+{
+		echo "mounting /bak readonly ..."
+		mount -o ro,remount /bak
+}
+
 mkdir -p /home/busybox
 
 # install updated version of busybox
@@ -26,6 +41,9 @@ mount --bind /media/hack/etc/profile /etc/profile
 mount --bind /media/hack/etc/group /etc/group
 mount --bind /media/hack/etc/passwd /etc/passwd
 mount --bind /media/hack/etc/shadow /etc/shadow
+
+# forcing Timezone
+mount --bind /media/hack/etc/TZ /etc/TZ
 # update hosts file to prevent communication
 if [ "$HACK_CLOUD" = "YES" ]; then
     mount --bind /media/hack/etc/hosts /etc/hosts
@@ -65,12 +83,14 @@ fi
 
 
 
-
 # Sync the time
 (sleep 20 && /home/busybox/ntpd -q -p 0.uk.pool.ntp.org ) &
 
-
+#camera config, mine is modified to disable the whitelight | support_doublelight = 2
+mountBakRW
+mount --bind /media/hack/bak/hwcfg.ini /bak/hwcfg.ini
 # Silence the voices
 if [ "$VOICE" = "YES" ]; then
-    mount --bind /media/hack/home/VOICE.tgz /home/VOICE.tgz
+    mount --bind /media/hack/bak/VOICE.tgz /bak/VOICE.tgz
 fi
+mountBakRO
