@@ -1,72 +1,67 @@
 #!/bin/sh
 
-# mount sd card to separate location
+# Mount SD card to /media
 if [ -b /dev/mmcblk0p1 ]; then
-	mount /dev/mmcblk0p1 /media
+    mount /dev/mmcblk0p1 /media
 elif [ -b /dev/mmcblk0 ]; then
-	mount /dev/mmcblk0 /media
+    mount /dev/mmcblk0 /media
 fi
 
-# include config
+# Include configuration file
 . /media/config.txt
 
-# confirm hack type
+# Confirm hack type
 touch /home/HACKSD
 
-#this camera model transfer all the files from /home to /bak
-#function to remount as read and write
-mountBakRW()
-{
-		echo "mounting /bak read & write ..."
-		mount -o rw,remount /bak
-}
-#function to remount as read only
-mountBakRO()
-{
-		echo "mounting /bak readonly ..."
-		mount -o ro,remount /bak
+# Functions for remounting /bak
+mountBakRW() {
+    echo "Mounting /bak read & write ..."
+    mount -o rw,remount /bak
 }
 
+mountBakRO() {
+    echo "Mounting /bak read-only ..."
+    mount -o ro,remount /bak
+}
+
+# Prepare directories
 mkdir -p /home/busybox
 
-# install updated version of busybox
+# Install updated version of busybox
 mount --bind /media/hack/busybox /bin/busybox
 /bin/busybox --install -s /home/busybox
 
-
-## Mount /etc/ files from microSD card
-# env
+# Mount /etc/ files from microSD card
 mount --bind /media/hack/etc/profile /etc/profile
-# users and groups
 mount --bind /media/hack/etc/group /etc/group
 mount --bind /media/hack/etc/passwd /etc/passwd
 mount --bind /media/hack/etc/shadow /etc/shadow
 
-# forcing Timezone
-mount --bind /media/hack/etc/TZ /etc/TZ
-# update hosts file to prevent communication
+# Force timezone
+echo "$TZ" > /media/hack/etc/TZ
+(sleep 10 && mount --bind /media/hack/etc/TZ /etc/TZ) &
+
+# Update hosts file to prevent cloud communication
 if [ "$HACK_CLOUD" = "YES" ]; then
     mount --bind /media/hack/etc/hosts /etc/hosts
 fi
 
-
-
 # Wi-Fi Settings
 if [ "$HACK_WIFI" = "YES" ]; then
-    echo "[cls_server]" > cls.conf
-    echo "ssid = $WIFI_SSID" >> cls.conf
-    echo "passwd = $WIFI_PASSWORD" >> cls.conf
+    cat <<EOF > cls.conf
+[cls_server]
+ssid = $WIFI_SSID
+passwd = $WIFI_PASSWORD
+EOF
 fi
 
-
-## Servers
-
-# Busybox httpd
+# Start services
+# Busybox HTTPD
 if [ "$HACK_HTTPD" = "YES" ]; then
-    /home/busybox/httpd -p 8080 -h /media/hack/www
+    /home/busybox/httpd -p 8080 -h /media/hack/www -C /media/hack/www/cgi-bin/
 fi
 
-# SSH Server - user root with no password required
+# SSH Server
 if [ "$HACK_SSH" = "YES" ]; then
     /media/hack/dropbearmulti dropbear -r /media/hack/dropbear_ecdsa_host_key -B
 fi
@@ -76,21 +71,19 @@ if [ "$HACK_FTP" = "YES" ]; then
     (/home/busybox/tcpsvd -E 0.0.0.0 21 /home/busybox/ftpd -w / ) &
 fi
 
-# Telnet Server
+# Disable Telnet Server
 if [ "$HACK_TELNET" = "NO" ]; then
     start-stop-daemon -K -n telnetd
 fi
 
+# Sync time with NTP server
+(sleep 20 && /home/busybox/ntpd -q -p 0.uk.pool.ntp.org) &
 
+# Camera configuration
+# Disable the white light (example config: support_doublelight = 2)
+mount --bind /media/hack/home/hwcfg.ini /home/hwcfg.ini
 
-# Sync the time
-(sleep 20 && /home/busybox/ntpd -q -p 0.uk.pool.ntp.org ) &
-
-#camera config, mine is modified to disable the whitelight | support_doublelight = 2
-mountBakRW
-mount --bind /media/hack/bak/hwcfg.ini /bak/hwcfg.ini
 # Silence the voices
 if [ "$VOICE" = "YES" ]; then
-    mount --bind /media/hack/bak/VOICE.tgz /bak/VOICE.tgz
+    mount --bind /media/hack/home/VOICE.tgz /home/VOICE.tgz
 fi
-mountBakRO

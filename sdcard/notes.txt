@@ -1,0 +1,25 @@
+#Order of execution
+# start.sh Execution Overview
+
+1. **File Transfer**:
+   - Move the following files from `/home` to `/bak`:
+     - eye.conf
+     - hardinfo.bin
+     - hwcfg.ini
+     - ptz.cfg
+     - image.ini
+     - VOICE.tgz
+
+2. **Hack File**:
+   - The hack file is executed (debug_cmd.sh).
+   - Start a background task with a timer (10sec) to set the timezone from config.txt.
+
+3. **PTZ Driver Configuration**:
+   - To prevent camera movement on reboot/boot:
+     - Set `ptz_no_selfck=0` in `hwcfg.ini`.
+
+4. **Timezone Setup**:
+   - start.sh will try to set the time zone, it's hardcoded, to avoid this, the timed task from before is executed after, (10 sec seems to work)
+
+6. **Start p2pcam**:
+   - Start the `p2pcam` service.
