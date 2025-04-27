@@ -16,12 +16,14 @@ This hack is for various Chinese Goke GK7102 based IP Cameras. There are few dif
 * BusyBox FTP Server (http://192.168.1.66:21) (camera ip)
 * dropbear SSH Server: root can login ssh without password
 * WebUI PTZ - (http://192.168.1.66:8080) (camera ip)
+* Limited WebUI access only for authorized users (default admin/1234)
 * Telnet on port 22
 * Debug and diagnostics tools: [andrew-d/static-binaries](https://github.com/andrew-d/static-binaries/tree/master/binaries/linux/arm)
 * Changes login credentials to ```user: root password: cxlinux```
 * Improved terminal experience
 * Wi-Fi configuration without cloud account
 
+* PTZ control for [Zoneminder](https://Zoneminder.com)
 
 ## Installation
 

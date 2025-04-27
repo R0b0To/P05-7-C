@@ -12,6 +12,9 @@ WIFI_PASSWORD=your_wifi_password
 
 # Busybox httpd for WebUI PTZ
 HACK_HTTPD=YES
+HTTP_PORT=1200
+WEB_AUTH_USER=
+WEB_ACCESS_PWD=
 
 # SSH Server - user root with no password required
 HACK_SSH=YES
