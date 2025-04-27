@@ -20,6 +20,13 @@ fi
 # For the correct pins look at hardinfo.bin (/bak)
 execute_command() {
     case "$command" in
+        "playaudio")
+            gio -s 22 0 /dev/null
+            cgi_cm 'playaudio?file=/tmp/VOICE/alarm.wav'
+            echo "Alarm";;
+        "reset")
+            cgi_cmd 'rstsys'
+            echo "System Reset";;
         "iron") 
             gio -s 23 0 /dev/null
             echo "IR LEDs On";;

@@ -58,7 +58,20 @@ fi
 # Start services
 # Busybox HTTPD
 if [ "$HACK_HTTPD" = "YES" ]; then
-    /home/busybox/httpd -p 8080 -h /media/hack/www -C /media/hack/www/cgi-bin/
+
+    if [[ -z "$WEB_AUTH_USER" ]]; then
+        WEB_AUTH_USER="admin"
+    fi
+    if [[ -z "$WEB_ACCESS_PWD" ]]; then
+        WEB_ACCESS_PWD="1234"
+    fi
+    
+    #echo -e "/:$WEB_AUTH_USER:$WEB_ACCESS_PWD" >> /media/hack/etc/httpd.conf
+    sed -i '/\/:/c\\/:'$WEB_AUTH_USER':'$WEB_ACCESS_PWD'' /media/hack/etc/httpd.conf
+    touch /home/etc/httpd.conf
+    mount --bind /media/hack/etc/httpd.conf /home/etc/httpd.conf
+    /home/busybox/httpd -p $HTTP_PORT -h /media/hack/www -c /home/etc/httpd.conf
+    #/home/busybox/httpd -p $HTTP_PORT -h /media/hack/www -C /media/hack/www/cgi-bin/
 fi
 
 # SSH Server
