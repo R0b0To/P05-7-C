@@ -11,11 +11,11 @@ This hack is for various Chinese Goke GK7102 based IP Cameras. There are few dif
 ## Features
 
 * Blocking cloud hosts
-* New version of BusyBox v1.26.2
+* New version of BusyBox v1.37.0
 * Configurable settings
-* BusyBox FTP Server (http://192.168.1.66:21) (camera ip)
+* BusyBox FTP Server (http://192.168.1.xx:21) (camera ip)
 * dropbear SSH Server: root can login ssh without password
-* WebUI PTZ - (http://192.168.1.66:8080) (camera ip)
+* WebUI PTZ - (http://192.168.1.xx:8080) (camera ip)
 * Telnet on port 22
 * Debug and diagnostics tools: [andrew-d/static-binaries](https://github.com/andrew-d/static-binaries/tree/master/binaries/linux/arm)
 * Changes login credentials to ```user: root password: cxlinux```
