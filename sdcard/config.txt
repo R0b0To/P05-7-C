@@ -26,9 +26,6 @@ HACK_TELNET=YES
 #####################################################################
 ## System Settings
 
-# TimeZone
-TZ=CST-1
-
 # Silence Voices
 # Possibly causes some cameras to fail, use at your own risk
 VOICE=NO
