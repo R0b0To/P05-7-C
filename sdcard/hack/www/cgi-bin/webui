@@ -1,78 +1,53 @@
 #!/bin/sh
 
-echo "Content-type: text/html"
+echo "Content-type: text/plain"
 echo ""
 
+# Extract the command from the URL
 command=$(echo "$QUERY_STRING" | awk -F'=' '{print $2}' | awk -F'&' '{print $1}')
 
-#This is used to make http requests within the cam, you could do it manually, example http://192.168.1.66:8001/ircut?mode=night
-#I found the list of accepted commands at /p2pcam using ghidra to read it.
-cgi_cmd() {
-    /bak/httpclt get 'http://127.0.0.1:8001/'$1
-}
-if [ -f /home/HACKP ]; then
-ptzfolder="/home/hack"
-elif [ -f /home/HACKSD ]; then
-ptzfolder="/media/hack"
+# Setup the path to your custom PTZ binary
+if [ -f /home/HACKSD ] || [ -f /tmp/HACKSD ]; then
+    ptz_bin="/media/hack/ptz-ctrl"
+else
+    ptz_bin="/home/hack/ptz-ctrl"
 fi
 
-# Execute command and return the result
-# For the correct pins look at hardinfo.bin (/bak)
-execute_command() {
-    case "$command" in
-        "iron") 
-            gio -s 23 0 /dev/null
-            echo "IR LEDs On";;
-        "iroff") 
-            gio -s 23 1 /dev/null
-            echo "IR LEDs Off";;
-        "lighton") 
-            gio -s 24 0 > /dev/null
-            echo "Light On";;
-        "lightoff") 
-            gio -s 24 1 > /dev/null
-            echo "Light Off";;
-        "ircutnight") 
-            cgi_cmd 'ircut?mode=night' && echo "Night Mode On"
-            busybox sleep 2
-            gio -s 23 1 > /dev/null;;
-        "ircutday") 
-            cgi_cmd 'ircut?mode=day'
-            echo "Night Mode Off";;
-        "ircutauto") 
-            cgi_cmd 'ircut?mode=auto'
-            echo "auto Mode";;
-        "ptzu") 
-            $ptzfolder/ptz-ctrl u > /dev/null
-            echo "PTZ Up";;
-        "ptzd") 
-            $ptzfolder/ptz-ctrl d > /dev/null
-            echo "PTZ Down";;
-        "ptzl") 
-            $ptzfolder/ptz-ctrl l > /dev/null
-            echo "PTZ Left";;
-        "ptzr") 
-            $ptzfolder/ptz-ctrl r > /dev/null
-            echo "PTZ Right";;
-        "ptzlu") 
-            $ptzfolder/ptz-ctrl lu > /dev/null
-            echo "PTZ Left-Up";;
-        "ptzld") 
-            $ptzfolder/ptz-ctrl ld > /dev/null
-            echo "PTZ Left-Down";;
-        "ptzru") 
-            $ptzfolder/ptz-ctrl ru > /dev/null
-            echo "PTZ Right-Up";;
-        "ptzrd") 
-            $ptzfolder/ptz-ctrl rd > /dev/null
-            echo "PTZ Right-Down";;
-        "uptime") 
-            uptime_info=$(uptime)
-            echo "Uptime: $uptime_info";;    
-        *)
-            echo "Unknown command: $command";;
-    esac
+cgi_cmd() {
+    /bak/httpclt get "http://127.0.0.1:8001/$1" > /dev/null 2>&1
 }
 
-# Run the function based on the command
-execute_command
+case "$command" in
+    "iron") 
+        gio -s 23 0 > /dev/null
+        echo "IR LEDs On" ;;
+    "iroff") 
+        gio -s 23 1 > /dev/null
+        echo "IR LEDs Off" ;;
+    "lighton") 
+        gio -s 24 0 > /dev/null
+        echo "Light On" ;;
+    "lightoff") 
+        gio -s 24 1 > /dev/null
+        echo "Light Off" ;;
+    "ircutnight") 
+        cgi_cmd 'ircut?mode=night'
+        # IR Cut usually needs a moment to flip before turning off LEDs
+        sleep 1
+        echo "Night Mode Active" ;;
+    "ircutday") 
+        cgi_cmd 'ircut?mode=day'
+        echo "Day Mode Active" ;;
+    "ptzu")  $ptz_bin u  > /dev/null && echo "Moving Up" ;;
+    "ptzd")  $ptz_bin d  > /dev/null && echo "Moving Down" ;;
+    "ptzl")  $ptz_bin l  > /dev/null && echo "Moving Left" ;;
+    "ptzr")  $ptz_bin r  > /dev/null && echo "Moving Right" ;;
+    "ptzlu") $ptz_bin lu > /dev/null && echo "Moving Left-Up" ;;
+    "ptzld") $ptz_bin ld > /dev/null && echo "Moving Left-Down" ;;
+    "ptzru") $ptz_bin ru > /dev/null && echo "Moving Right-Up" ;;
+    "ptzrd") $ptz_bin rd > /dev/null && echo "Moving Right-Down" ;;
+    "uptime") 
+        uptime | awk '{print "Uptime: " $3 " " $4}' | sed 's/,//g' ;;
+    *)
+        echo "Unknown command: $command" ;;
+esac

@@ -1,193 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="shortcut icon" href="#">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Camera - WebUI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPC Master Control</title>
     <style>
-       body {
-            font-family: Roboto;
+        :root {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
+            --accent: #4CAF50;
+            --ptz: #2196F3;
+            --danger: #f44336;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        h1 {
+
+        .header {
+            width: 100%;
+            padding: 15px 0;
             text-align: center;
-            font-size: 1.5em;
-            color: #4CAF50;
+            background: var(--card);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            font-weight: bold;
+            color: var(--accent);
+            letter-spacing: 1px;
         }
-        .container {
-            text-align: center;
+
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            box-sizing: border-box;
         }
+
+        /* Live View Window */
+        .viewport {
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--card);
+            position: relative;
+            aspect-ratio: 16 / 9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+
         #snapshot {
-            max-width: 100%;
-            border: 1px solid #ddd;
-            margin: 20px auto;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
-        .button {
+
+        .live-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(244, 67, 54, 0.8);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            text-transform: uppercase;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0.3; } }
+
+        /* Controls Section */
+        .section-title {
+            margin: 20px 0 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            background: var(--card);
+            border: 1px solid #333;
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            background: #333;
+        }
+
+        /* PTZ D-PAD */
+        .ptz-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 220px;
+            margin: 10px auto;
+        }
+
+        .ptz-btn {
+            background: var(--ptz);
+            color: white;
+            font-size: 20px;
+            border: none;
+            aspect-ratio: 1 / 1;
+        }
+
+        .ptz-btn.diag { background: #1976D2; font-size: 16px; }
+
+        .ptz-center {
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #555;
+        }
+
+        /* Status Toast */
+        #status-bar {
+            position: fixed;
+            bottom: 20px;
+            background: var(--accent);
+            color: #000;
             padding: 10px 20px;
-            margin: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 1000;
         }
-        .button:hover {
-            background-color: #45a049;
-        }
-        .button:active {
-            background-color: #388e3c;
-        }
-        .ptz-controls button {
-            padding: 10px;
-            font-size: 1em;
-            margin: 5px;
-            cursor: pointer;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .ptz-controls button:hover {
-            background-color: #1976D2;
-        }
+
         footer {
-            margin-top: 20px;
-            font-size: 0.9em;
+            margin-top: 30px;
+            font-size: 11px;
+            color: #666;
             text-align: center;
+            padding-bottom: 20px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <img id="snapshot" src="cgi-bin/snapshot" alt="Camera Snapshot" />
+<div class="header">IPC DASHBOARD</div>
 
-    <div>
-        <button class="button" id="home">Home</button>
-        <button class="button" id="lighton">Light On</button>
-        <button class="button" id="lightoff">Light Off</button>
-        <button class="button" id="ircutnight">Night Mode On</button>
-        <button class="button" id="ircutday">Night Mode Off</button>
-        <button class="button" id="irledson">IR LEDs On</button>
-        <button class="button" id="irledsoff">IR LEDs Off</button>
+<div class="main-container">
+    <div class="viewport">
+        <div class="live-tag">Live</div>
+        <img id="snapshot" src="cgi-bin/snapshot" alt="Connect Error" />
     </div>
 
-    <div class="ptz-controls">
-        <div>
-            <button class="button" id="ptzlu">&#11017;</button>
-            <button class="button" id="ptzu">&#11014;</button>
-            <button class="button" id="ptzru">&#11016;</button>
-        </div>
-        <div>
-            <button class="button" id="ptzl">&#11013;</button>
-            <span>PTZ</span>
-            <button class="button" id="ptzr">&#10145;</button>
-        </div>
-        <div>
-            <button class="button" id="ptzld">&#11019;</button>
-            <button class="button" id="ptzd">&#11015;</button>
-            <button class="button" id="ptzrd">&#11018;</button>
-        </div>
+    <div class="section-title">Hardware Controls</div>
+    <div class="button-grid">
+        <button onclick="cmd('lighton')">💡 Light On</button>
+        <button onclick="cmd('lightoff')">🌑 Light Off</button>
+        <button onclick="cmd('ircutnight')">🌙 Night Mode</button>
+        <button onclick="cmd('ircutday')">☀️ Day Mode</button>
+        <button onclick="cmd('iron')">🔴 IR LED On</button>
+        <button onclick="cmd('iroff')">⚪ IR LED Off</button>
+    </div>
+
+    <div class="section-title" style="text-align:center">PTZ Control</div>
+    <div class="ptz-container">
+        <button class="ptz-btn diag" onclick="cmd('ptzlu')">↖</button>
+        <button class="ptz-btn" onclick="cmd('ptzu')">▲</button>
+        <button class="ptz-btn diag" onclick="cmd('ptzru')">↗</button>
+        
+        <button class="ptz-btn" onclick="cmd('ptzl')">◀</button>
+        <div class="ptz-center">MOVE</div>
+        <button class="ptz-btn" onclick="cmd('ptzr')">▶</button>
+        
+        <button class="ptz-btn diag" onclick="cmd('ptzld')">↙</button>
+        <button class="ptz-btn" onclick="cmd('ptzd')">▼</button>
+        <button class="ptz-btn diag" onclick="cmd('ptzrd')">↘</button>
     </div>
 
     <footer>
-        <p><span id="uptime"></span></p>
+        <div id="uptime">Uptime: Loading...</div>
+        <div>ARMv6l Camera</div>
     </footer>
 </div>
 
+<div id="status-bar"></div>
+
 <script>
-    // Send AJAX request to execute commands without reloading the page
-    async function sendCommand(command) {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'cgi-bin/webui?command=' + command, true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    resolve(xhr.responseText); // Resolve with the response text
-                } else {
-                    reject(`Error: ${xhr.status}`); // Handle errors
-                }
-            }
-        };
-        xhr.send();
-    });
-}
-
-    
-    document.getElementById('lighton').addEventListener('click', function() {
-        sendCommand('lighton');
-    });
-
-    document.getElementById('lightoff').addEventListener('click', function() {
-        sendCommand('lightoff');
-    });
-
-    document.getElementById('ircutnight').addEventListener('click', function() {
-        sendCommand('ircutnight');
-    });
-
-    document.getElementById('ircutday').addEventListener('click', function() {
-        sendCommand('ircutday');
-    });
-
-    document.getElementById('irledson').addEventListener('click', function() {
-        sendCommand('iron');
-    });
-
-    document.getElementById('irledsoff').addEventListener('click', function() {
-        sendCommand('iroff');
-    });
-
-    document.getElementById('ptzlu').addEventListener('click', function() {
-        sendCommand('ptzlu');
-    });
-
-    document.getElementById('ptzu').addEventListener('click', function() {
-        sendCommand('ptzu');
-    });
-
-    document.getElementById('ptzru').addEventListener('click', function() {
-        sendCommand('ptzru');
-    });
-
-    document.getElementById('ptzl').addEventListener('click', function() {
-        sendCommand('ptzl');
-    });
-
-    document.getElementById('ptzr').addEventListener('click', function() {
-        sendCommand('ptzr');
-    });
-
-    document.getElementById('ptzld').addEventListener('click', function() {
-        sendCommand('ptzld');
-    });
-
-    document.getElementById('ptzd').addEventListener('click', function() {
-        sendCommand('ptzd');
-    });
-
-    document.getElementById('ptzrd').addEventListener('click', function() {
-        sendCommand('ptzrd');
-    });
-
-    
-    async function updateUI() {
-        document.getElementById('uptime').innerText = await sendCommand('uptime');
+    // Show feedback toast
+    function showStatus(msg) {
+        const bar = document.getElementById('status-bar');
+        bar.innerText = msg;
+        bar.style.display = 'block';
+        setTimeout(() => { bar.style.display = 'none'; }, 2000);
     }
-    setInterval(function() {
-        document.getElementById("snapshot").src = "cgi-bin/snapshot?t=" + Math.random();
-    }, 1000);
 
-    setInterval(updateUI, 60000);
-    updateUI();  // Initial call
+    // Execute CGI commands
+    async function cmd(c) {
+        try {
+            const response = await fetch(`cgi-bin/webui?command=${c}`);
+            const text = await response.text();
+            showStatus(text.trim());
+        } catch (err) {
+            showStatus("Connection Error");
+        }
+    }
+
+    // Update Uptime
+    async function updateUptime() {
+        try {
+            const response = await fetch('cgi-bin/webui?command=uptime');
+            document.getElementById('uptime').innerText = await response.text();
+        } catch (e) {}
+    }
+
+    // Image refresh logic
+    const camImg = document.getElementById("snapshot");
+    setInterval(() => {
+        if (!document.hidden) {
+            camImg.src = "cgi-bin/snapshot?t=" + new Date().getTime();
+        }
+    }, 1200);
+
+    // Initial load
+    updateUptime();
+    setInterval(updateUptime, 30000);
 </script>
 
 </body>

@@ -1,5 +1,9 @@
 #!/bin/sh
-#
+# Send the correct header
 echo "Content-type: image/jpeg"
+# One empty echo is REQUIRED to separate headers from binary data
 echo ""
-/home/busybox/wget http://localhost:554/snapshot -O -
+
+# Use wget to grab the image from the internal camera server
+# We use /media/hack/busybox explicitly to ensure it works
+/media/hack/busybox wget http://localhost:554/snapshot -O - 2>/dev/null
